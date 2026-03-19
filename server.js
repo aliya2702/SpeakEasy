@@ -113,7 +113,7 @@ app.get("*", (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`\n🎙️  Speakeasy server running at http://localhost:${PORT}`);
   console.log(`   Groq key:  ${process.env.GROQ_API_KEY ? "✅ loaded" : "❌ missing"}`);
   console.log(`   Murf key:  ${process.env.MURF_API_KEY ? "✅ loaded" : "❌ missing"}\n`);
