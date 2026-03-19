@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Speakeasy – AI Voice Coach</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:#080810; --surface:#0f0f1a; --card:#141422; --card2:#1a1a2e;
+      --border:#252540; --border2:#303055;
+      --accent:#a8ff57; --accent2:#57d4ff; --accent3:#ff6b8a; --accent4:#c57bff;
+      --text:#e8e8f5; --muted:#60607a; --muted2:#888899;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
+    .bg-layer{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(168,255,87,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(168,255,87,.025) 1px,transparent 1px);background-size:52px 52px}
+    .blob{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;animation:bdrift 14s ease-in-out infinite alternate}
+    .blob-1{width:550px;height:550px;background:var(--accent);opacity:.07;top:-180px;left:-160px}
+    .blob-2{width:450px;height:450px;background:var(--accent2);opacity:.06;bottom:-120px;right:-100px;animation-delay:-5s}
+    @keyframes bdrift{from{transform:translate(0,0)}to{transform:translate(28px,18px)}}
+    .wrapper{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:36px 24px 100px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:40px;flex-wrap:wrap;gap:12px}
+    .logo{display:flex;align-items:center;gap:13px}
+    .logo-mark{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#6dde00);display:grid;place-items:center;font-size:22px;box-shadow:0 0 20px rgba(168,255,87,.3)}
+    .logo-name{font-size:24px;font-weight:800;letter-spacing:-.8px}
+    .logo-name span{color:var(--accent)}
+    .header-right{display:flex;align-items:center;gap:10px}
+    .user-pill{display:flex;align-items:center;gap:8px;background:var(--card);border:1.5px solid var(--border);border-radius:99px;padding:6px 16px 6px 8px}
+    .user-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:13px;font-weight:800;color:#080810}
+    .user-name{font-size:13px;font-weight:700}
+    .logout-btn{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:6px 14px;border-radius:99px;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
+    .logout-btn:hover{border-color:var(--accent3);color:var(--accent3)}
+    .greeting{background:linear-gradient(135deg,rgba(168,255,87,.08),rgba(87,212,255,.05));border:1.5px solid rgba(168,255,87,.2);border-radius:20px;padding:24px 28px;margin-bottom:36px;display:flex;align-items:center;gap:20px;animation:fadeup .5s ease}
+    @keyframes fadeup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .greeting-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:24px;font-weight:800;color:#080810;flex-shrink:0}
+    .greeting-text h2{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+    .greeting-text h2 em{font-style:normal;color:var(--accent)}
+    .greeting-text p{font-size:14px;color:var(--muted2);font-weight:400}
+    .section-tabs{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap}
+    .section-tab{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:10px 22px;border-radius:14px;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--muted);transition:all .2s}
+    .section-tab:hover{border-color:var(--accent);color:var(--accent)}
+    .section-tab.active{background:var(--accent);border-color:var(--accent);color:#080810}
+    .section{display:none}.section.active{display:block}
+    .controls-row{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;align-items:center}
+    .tab{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:8px 18px;border-radius:99px;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--muted);transition:all .2s}
+    .tab:hover{border-color:var(--accent);color:var(--accent)}
+    .tab.active{background:var(--accent);border-color:var(--accent);color:#080810}
+    .lang-wrap{position:relative}
+    .lang-select{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:8px 36px 8px 14px;border-radius:99px;cursor:pointer;border:1.5px solid var(--border);background:var(--card);color:var(--text);appearance:none;outline:none}
+    .lang-wrap::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+    .main-card{background:var(--card);border:1.5px solid var(--border);border-radius:28px;padding:36px;margin-bottom:18px;position:relative;overflow:hidden;transition:border-color .3s}
+    .main-card.has-suggestion{border-color:rgba(168,255,87,.35)}
+    .main-card.has-suggestion::after{opacity:1}
+    .main-card::after{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .4s}
+    .mic-row{display:flex;align-items:center;gap:22px;margin-bottom:30px}
+    .mic-btn{width:78px;height:78px;border-radius:50%;border:2px solid var(--border2);background:var(--surface);cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:all .25s}
+    .mic-btn svg{width:30px;height:30px;color:var(--muted2);transition:color .2s}
+    .mic-btn:hover{border-color:var(--accent)}
+    .mic-btn:hover svg{color:var(--accent)}
+    .mic-btn.recording{border-color:var(--accent3);background:rgba(255,107,138,.1);animation:ring-pulse 1.2s ease-out infinite}
+    .mic-btn.recording svg{color:var(--accent3)}
+    @keyframes ring-pulse{0%{box-shadow:0 0 0 0 rgba(255,107,138,.5)}70%{box-shadow:0 0 0 18px rgba(255,107,138,0)}100%{box-shadow:0 0 0 0 rgba(255,107,138,0)}}
+    .mic-info h3{font-size:17px;font-weight:700;margin-bottom:5px}
+    .mic-info p{font-size:13px;color:var(--muted);font-weight:400;line-height:1.5}
+    .rec-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,107,138,.15);border-radius:99px;padding:2px 10px;font-size:11px;color:var(--accent3);font-family:'DM Mono',monospace}
+    .rec-dot{width:6px;height:6px;border-radius:50%;background:var(--accent3);animation:blink 1s step-end infinite}
+    @keyframes blink{50%{opacity:0}}
+    .waveform{display:flex;align-items:center;gap:3px;height:44px;margin-bottom:26px;opacity:0;transition:opacity .3s}
+    .waveform.show{opacity:1}
+    .wbar{width:4px;border-radius:2px;background:var(--accent3);height:6px}
+    .waveform.animating .wbar{animation:wanimate .6s ease-in-out infinite alternate}
+    .wbar:nth-child(2n){animation-delay:.08s}.wbar:nth-child(3n){animation-delay:.16s}.wbar:nth-child(4n){animation-delay:.04s}
+    @keyframes wanimate{from{height:5px}to{height:38px}}
+    .field-label{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .field-label-text{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+    .spinner{width:12px;height:12px;border-radius:50%;border:2px solid var(--border2);border-top-color:var(--accent);animation:spin .7s linear infinite;display:none}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinner.show{display:block}
+    .text-box{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:16px 20px;min-height:72px;font-size:15px;line-height:1.65;color:var(--text);margin-bottom:18px}
+    .text-box:empty::after{content:attr(data-ph);color:var(--muted);font-style:italic}
+    .filler-word{background:rgba(255,107,138,.25);color:var(--accent3);border-radius:4px;padding:1px 4px;font-weight:700}
+    .suggestion-box{background:rgba(168,255,87,.04);border:1.5px solid rgba(168,255,87,.2);border-radius:16px;padding:16px 20px;min-height:72px;font-size:15px;line-height:1.65;color:var(--text);margin-bottom:22px;transition:all .35s}
+    .suggestion-box:empty::after{content:attr(data-ph);color:var(--muted);font-style:italic}
+    .suggestion-box.glow{border-color:var(--accent);box-shadow:0 0 24px rgba(168,255,87,.1)}
+    .emotion-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+    .emotion-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:99px;font-size:13px;font-weight:700;border:1.5px solid;animation:fadeup .4s ease}
+    .filler-counter{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:99px;font-size:12px;font-weight:700;background:rgba(255,107,138,.1);border:1.5px solid rgba(255,107,138,.3);color:var(--accent3);font-family:'DM Mono',monospace}
+    .action-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;padding:12px 24px;border-radius:14px;border:none;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .btn-primary{background:var(--accent);color:#080810}
+    .btn-primary:hover:not(:disabled){filter:brightness(1.1);transform:translateY(-2px)}
+    .btn-secondary{background:var(--surface);color:var(--text);border:1.5px solid var(--border)}
+    .btn-secondary:hover:not(:disabled){border-color:var(--accent2);color:var(--accent2)}
+    .btn-ghost{background:transparent;color:var(--muted);border:1.5px solid transparent;padding:12px 14px}
+    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+    @media(max-width:600px){.metrics{grid-template-columns:1fr}}
+    .metric{background:var(--card);border:1.5px solid var(--border);border-radius:18px;padding:18px 20px}
+    .metric-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+    .metric-val{font-size:30px;font-weight:800;letter-spacing:-1.5px;line-height:1;margin-bottom:4px}
+    .green{color:var(--accent)}.blue{color:var(--accent2)}.pink{color:var(--accent3)}
+    .metric-sub{font-size:12px;color:var(--muted);font-weight:400}
+    .bar-wrap{height:3px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:10px}
+    .bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent2),var(--accent));width:0;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+    .card{background:var(--card);border:1.5px solid var(--border);border-radius:22px;padding:24px 28px;margin-bottom:18px}
+    .card h4{font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .voice-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+    .voice-option{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .2s}
+    .voice-option:hover{border-color:var(--accent2)}
+    .voice-option.selected{border-color:var(--accent2);background:rgba(87,212,255,.08)}
+    .voice-name{font-size:13px;font-weight:700;margin-bottom:2px}
+    .voice-desc{font-size:11px;color:var(--muted);font-weight:400}
+    .history-list{display:flex;flex-direction:column;gap:12px}
+    .history-item{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;animation:fadeup .3s ease}
+    .history-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .history-scenario{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:1px;text-transform:uppercase}
+    .history-time{font-size:11px;color:var(--muted)}
+    .history-before{font-size:13px;color:var(--muted2);margin-bottom:4px}
+    .history-after{font-size:13px;color:var(--text);font-weight:600}
+    .empty-history{font-size:13px;color:var(--muted);text-align:center;padding:20px 0;font-style:italic}
+    /* PRACTICE */
+    .practice-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:28px}
+    .practice-card{background:var(--card);border:1.5px solid var(--border);border-radius:20px;padding:24px;cursor:pointer;transition:all .25s}
+    .practice-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.3)}
+    .pc-icon{font-size:32px;margin-bottom:12px}
+    .pc-title{font-size:16px;font-weight:800;margin-bottom:6px}
+    .pc-desc{font-size:13px;color:var(--muted2);font-weight:400;line-height:1.5}
+    .pc-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;padding:3px 10px;border-radius:99px;margin-top:10px}
+    .arena{background:var(--card);border:1.5px solid var(--border);border-radius:24px;padding:32px;display:none}
+    .arena.show{display:block}
+    .arena-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+    .arena-title{font-size:18px;font-weight:800}
+    .arena-back{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:8px 16px;border-radius:12px;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer}
+    .arena-back:hover{border-color:var(--accent2);color:var(--accent2)}
+    .prompt-box{background:linear-gradient(135deg,rgba(168,255,87,.06),rgba(87,212,255,.04));border:1.5px solid rgba(168,255,87,.25);border-radius:16px;padding:20px 24px;margin-bottom:20px}
+    .prompt-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:8px}
+    .prompt-text{font-size:16px;line-height:1.6;font-weight:600}
+    .pmicbtn{width:64px;height:64px;border-radius:50%;border:2px solid var(--border2);background:var(--surface);cursor:pointer;display:grid;place-items:center;transition:all .25s;margin:0 auto 16px}
+    .pmicbtn svg{width:26px;height:26px;color:var(--muted2)}
+    .pmicbtn:hover{border-color:var(--accent)}.pmicbtn:hover svg{color:var(--accent)}
+    .pmicbtn.recording{border-color:var(--accent3);background:rgba(255,107,138,.1);animation:ring-pulse 1.2s ease-out infinite}
+    .pmicbtn.recording svg{color:var(--accent3)}
+    .score-reveal{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:20px 24px;margin-top:16px;display:none;animation:fadeup .4s ease}
+    .score-reveal.show{display:block}
+    .score-row{display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+    .big-score{font-size:52px;font-weight:800;letter-spacing:-2px;line-height:1}
+    .score-title{font-size:16px;font-weight:700;margin-bottom:4px}
+    .score-sub{font-size:13px;color:var(--muted2)}
+    .feedback-list{display:flex;flex-direction:column;gap:8px}
+    .feedback-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--muted2);line-height:1.5}
+    .next-btn{width:100%;margin-top:16px;padding:13px;background:var(--accent);color:#080810;border:none;border-radius:14px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer}
+    .next-btn:hover{filter:brightness(1.1)}
+    /* DASHBOARD */
+    .improvement-banner{background:linear-gradient(135deg,rgba(168,255,87,.1),rgba(87,212,255,.06));border:1.5px solid rgba(168,255,87,.25);border-radius:14px;padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;gap:14px}
+    .improvement-pct{font-size:36px;font-weight:800;color:var(--accent);letter-spacing:-2px;line-height:1;flex-shrink:0}
+    .improvement-text{font-size:14px;font-weight:700;margin-bottom:2px}
+    .improvement-sub{font-size:12px;color:var(--muted2)}
+    .weekly-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+    .wstat{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+    .wstat-val{font-size:22px;font-weight:800;letter-spacing:-1px;margin-bottom:2px}
+    .wstat-label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:1px}
+    .chart-wrap{height:160px;margin-bottom:16px;position:relative}
+    .achievement-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+    .achievement{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px;text-align:center;transition:all .3s}
+    .achievement.unlocked{border-color:var(--accent)}
+    .ach-icon{font-size:28px;margin-bottom:8px}
+    .ach-name{font-size:12px;font-weight:700;margin-bottom:3px}
+    .ach-desc{font-size:10px;color:var(--muted)}
+    .ach-status{font-size:10px;margin-top:6px;font-family:'DM Mono',monospace}
+    /* COMPARE */
+    .compare-row{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center}
+    @media(max-width:580px){.compare-row{grid-template-columns:1fr}}
+    .compare-side{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:20px;text-align:center;transition:all .3s}
+    .compare-side.playing{border-color:var(--accent);box-shadow:0 0 20px rgba(168,255,87,.15)}
+    .compare-side.playing-murf{border-color:var(--accent2);box-shadow:0 0 20px rgba(87,212,255,.15)}
+    .compare-icon{font-size:36px;margin-bottom:10px}
+    .compare-label{font-size:13px;font-weight:700;margin-bottom:4px}
+    .compare-sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+    .compare-btn{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:9px 20px;border-radius:12px;border:none;cursor:pointer;width:100%;transition:all .2s}
+    .compare-btn:disabled{opacity:.4;cursor:not-allowed}
+    .cbtn-you{background:rgba(255,107,138,.15);color:var(--accent3);border:1.5px solid rgba(255,107,138,.3)}
+    .cbtn-murf{background:rgba(168,255,87,.15);color:var(--accent);border:1.5px solid rgba(168,255,87,.3)}
+    .vs{font-size:18px;font-weight:800;color:var(--muted);text-align:center}
+    /* TOAST */
+    .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card2);border:1.5px solid var(--border2);border-radius:14px;padding:12px 22px;font-size:14px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:1000;transition:transform .35s cubic-bezier(.4,0,.2,1);pointer-events:none}
+    .toast.show{transform:translateX(-50%) translateY(0)}
+    .toast.error{border-color:var(--accent3);color:var(--accent3)}
+    .toast.success{border-color:var(--accent);color:var(--accent)}
+    footer{margin-top:52px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+    footer span{color:var(--accent)}
+  </style>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="wrapper">
+  <header>
+    <div class="logo">
+      <div class="logo-mark">🎙️</div>
+      <div class="logo-name">Speak<span>easy</span></div>
+    </div>
+    <div class="header-right">
+      <div class="user-pill">
+        <div class="user-avatar" id="headerAvatar">?</div>
+        <div class="user-name" id="headerName">User</div>
+      </div>
+      <button class="logout-btn" onclick="logout()">👋 Logout</button>
+    </div>
+  </header>
+
+  <div class="greeting">
+    <div class="greeting-avatar" id="greetAvatar">?</div>
+    <div class="greeting-text">
+      <h2>Hey, <em id="greetName">there</em>! 👋</h2>
+      <p id="greetSub">Ready to level up your communication today?</p>
+    </div>
+  </div>
+
+  <div class="section-tabs">
+    <button class="section-tab active" onclick="switchSection('coach',this)">🎙️ AI Coach</button>
+    <button class="section-tab" onclick="switchSection('practice',this)">🏋️ Practice Mode</button>
+    <button class="section-tab" onclick="switchSection('dashboard',this)">📈 Dashboard</button>
+  </div>
+
+  <!-- AI COACH -->
+  <div class="section active" id="coachSection">
+    <div class="controls-row">
+      <button class="tab active" data-scenario="friend" onclick="setScenario(this)">💬 Friend</button>
+      <button class="tab" data-scenario="interview" onclick="setScenario(this)">🎯 Interview</button>
+      <button class="tab" data-scenario="apology" onclick="setScenario(this)">🤝 Apology</button>
+      <div class="lang-wrap">
+        <select class="lang-select" id="langSelect" onchange="setLanguage(this.value)">
+          <option value="English">🇺🇸 English</option>
+          <option value="Hindi">🇮🇳 Hindi</option>
+          <option value="Telugu">🇮🇳 Telugu</option>
+          <option value="Tamil">🇮🇳 Tamil</option>
+          <option value="Kannada">🇮🇳 Kannada</option>
+          <option value="Bengali">🇮🇳 Bengali</option>
+          <option value="Spanish">🇪🇸 Spanish</option>
+          <option value="French">🇫🇷 French</option>
+          <option value="Arabic">🇸🇦 Arabic</option>
+          <option value="Japanese">🇯🇵 Japanese</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="main-card" id="mainCard">
+      <div class="mic-row">
+        <button class="mic-btn" id="micBtn" onclick="toggleRecord()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+        <div class="mic-info">
+          <h3 id="micTitle">Click to Speak</h3>
+          <p id="micSubtitle">Choose a scenario, then click mic and talk naturally.</p>
+        </div>
+      </div>
+      <div class="waveform" id="waveform"></div>
+      <!-- EMOTION ROW -->
+      <div class="emotion-row" id="emotionRow" style="display:none">
+        <div class="emotion-badge" id="emotionBadge" style="background:rgba(136,136,153,.12);border-color:var(--muted2);color:var(--muted2)">😐 Neutral</div>
+        <div class="filler-counter" id="fillerCounter">0 filler words</div>
+      </div>
+      <div class="field-label"><span class="field-label-text">You said</span> <small style="color:var(--accent3);font-size:10px">filler words in red</small></div>
+      <div class="text-box" id="transcript" data-ph="Your speech will appear here…"></div>
+      <div class="field-label">
+        <span class="field-label-text">AI suggests</span>
+        <div class="spinner" id="spinner"></div>
+      </div>
+      <div class="suggestion-box" id="suggestion" data-ph="Speakeasy will rewrite your message here…"></div>
+      <div class="action-row">
+        <button class="btn btn-primary" id="speakBtn" onclick="speakSuggestion()" disabled>🔊 Play with Murf Voice</button>
+        <button class="btn btn-secondary" id="redoBtn" onclick="resetAll()" disabled>🔄 Try Again</button>
+        <button class="btn btn-ghost" onclick="copyText()">📋 Copy</button>
+      </div>
+    </div>
+
+    <!-- COMPARE -->
+    <div class="card" id="compareCard" style="display:none">
+      <h4>🎭 Voice Comparison</h4>
+      <div class="compare-row">
+        <div class="compare-side" id="yourSide">
+          <div class="compare-icon">🎤</div>
+          <div class="compare-label">Your Original</div>
+          <div class="compare-sub">Raw transcript</div>
+          <button class="compare-btn cbtn-you" onclick="highlightYour()">▶ Show Your Words</button>
+        </div>
+        <div class="vs">VS</div>
+        <div class="compare-side" id="murfSide">
+          <div class="compare-icon">🔊</div>
+          <div class="compare-label">Murf AI Enhanced</div>
+          <div class="compare-sub">Refined & confident</div>
+          <button class="compare-btn cbtn-murf" id="playMurfBtn" onclick="speakSuggestion()">▶ Play Murf Voice</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Sessions</div>
+        <div class="metric-val green" id="sessionCount">0</div>
+        <div class="metric-sub">Total runs</div>
+        <div class="bar-wrap"><div class="bar-fill" id="sessionBar"></div></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Clarity Score</div>
+        <div class="metric-val blue" id="clarityScore">—</div>
+        <div class="metric-sub">Filler words removed</div>
+        <div class="bar-wrap"><div class="bar-fill" id="clarityBar"></div></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Words Refined</div>
+        <div class="metric-val pink" id="wordsRefined">0</div>
+        <div class="metric-sub">Total improved</div>
+        <div class="bar-wrap"><div class="bar-fill" id="wordsBar"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4>🗣️ Choose Murf Voice</h4>
+      <div class="voice-grid" id="voiceGrid"></div>
+    </div>
+
+    <div class="card">
+      <h4>🕰️ Practice History</h4>
+      <div class="history-list" id="historyList">
+        <div class="empty-history">No sessions yet — start speaking!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRACTICE MODE -->
+  <div class="section" id="practiceSection">
+    <div id="practicePicker">
+      <p style="font-size:15px;color:var(--muted2);margin-bottom:20px">Choose a challenge — AI gives prompts and scores your responses! 🏆</p>
+      <div class="practice-grid">
+        <div class="practice-card" onclick="startPractice('confidence')" style="border-color:rgba(168,255,87,.2)">
+          <div class="pc-icon">💪</div><div class="pc-title">Confidence Builder</div>
+          <div class="pc-desc">Speak with authority. Scored on clarity and assertiveness.</div>
+          <span class="pc-badge" style="background:rgba(168,255,87,.15);color:var(--accent)">BEGINNER</span>
+        </div>
+        <div class="practice-card" onclick="startPractice('interview')" style="border-color:rgba(87,212,255,.2)">
+          <div class="pc-icon">🎯</div><div class="pc-title">Interview Prep</div>
+          <div class="pc-desc">Answer real interview questions. Scored on impact.</div>
+          <span class="pc-badge" style="background:rgba(87,212,255,.15);color:var(--accent2)">CAREER</span>
+        </div>
+        <div class="practice-card" onclick="startPractice('emotion')" style="border-color:rgba(255,107,138,.2)">
+          <div class="pc-icon">❤️</div><div class="pc-title">Emotional Expression</div>
+          <div class="pc-desc">Express feelings clearly and with empathy.</div>
+          <span class="pc-badge" style="background:rgba(255,107,138,.15);color:var(--accent3)">SOCIAL</span>
+        </div>
+        <div class="practice-card" onclick="startPractice('storytelling')" style="border-color:rgba(197,123,255,.2)">
+          <div class="pc-icon">📖</div><div class="pc-title">Storytelling</div>
+          <div class="pc-desc">Tell engaging stories. Scored on structure and flow.</div>
+          <span class="pc-badge" style="background:rgba(197,123,255,.15);color:var(--accent4)">ADVANCED</span>
+        </div>
+        <div class="practice-card" onclick="startPractice('smalltalk')" style="border-color:rgba(255,170,0,.2)">
+          <div class="pc-icon">☕</div><div class="pc-title">Small Talk</div>
+          <div class="pc-desc">Master casual conversation starters.</div>
+          <span class="pc-badge" style="background:rgba(255,170,0,.15);color:#ffaa00">EVERYDAY</span>
+        </div>
+        <div class="practice-card" onclick="startPractice('conflict')" style="border-color:rgba(87,255,204,.2)">
+          <div class="pc-icon">🤝</div><div class="pc-title">Conflict Resolution</div>
+          <div class="pc-desc">Handle difficult conversations gracefully.</div>
+          <span class="pc-badge" style="background:rgba(87,255,204,.15);color:#57ffcc">PRO</span>
+        </div>
+      </div>
+    </div>
+    <div class="arena" id="practiceArena">
+      <div class="arena-header">
+        <div class="arena-title" id="arenaTitle">💪 Practice</div>
+        <button class="arena-back" onclick="exitPractice()">← Back</button>
+      </div>
+      <div class="prompt-box">
+        <div class="prompt-label">Your Prompt</div>
+        <div class="prompt-text" id="promptText">Loading…</div>
+      </div>
+      <div style="text-align:center;margin-bottom:8px">
+        <button class="pmicbtn" id="pmicBtn" onclick="togglePracticeRecord()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+        <p id="practiceStatus" style="font-size:13px;color:var(--muted)">Click mic and respond to the prompt</p>
+      </div>
+      <div class="field-label"><span class="field-label-text">Your Response</span></div>
+      <div class="text-box" id="practiceTranscript" data-ph="Your spoken response will appear here…"></div>
+      <div class="score-reveal" id="scoreReveal">
+        <div class="score-row">
+          <div class="big-score" id="bigScore">—</div>
+          <div><div class="score-title" id="scoreTitle">Great job!</div><div class="score-sub">Detailed feedback:</div></div>
+        </div>
+        <div class="feedback-list" id="feedbackList"></div>
+        <button class="next-btn" onclick="nextPrompt()">Next Prompt →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="section" id="dashboardSection">
+    <div class="improvement-banner">
+      <div class="improvement-pct" id="improvePct">0%</div>
+      <div>
+        <div class="improvement-text" id="improveText">Keep practicing to see improvement!</div>
+        <div class="improvement-sub" id="improveSub">Complete sessions in AI Coach to unlock stats</div>
+      </div>
+    </div>
+    <div class="weekly-stats">
+      <div class="wstat"><div class="wstat-val green" id="wSessions">0</div><div class="wstat-label">SESSIONS</div></div>
+      <div class="wstat"><div class="wstat-val blue" id="wAvg">—</div><div class="wstat-label">AVG CLARITY</div></div>
+      <div class="wstat"><div class="wstat-val pink" id="wBest">—</div><div class="wstat-label">BEST SCORE</div></div>
+    </div>
+    <div class="card">
+      <h4>📈 Clarity Score Over Time</h4>
+      <div class="chart-wrap"><canvas id="progressChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h4>💡 Personalised Tips</h4>
+      <div id="tipsList"><div style="font-size:13px;color:var(--muted);font-style:italic">Complete a session to unlock tips!</div></div>
+    </div>
+    <div class="card">
+      <h4>🏆 Achievements</h4>
+      <div class="achievement-grid" id="achieveGrid"></div>
+    </div>
+  </div>
+
+  <footer>Built with ❤️ for <span>Murf AI Hackathon</span> · Speakeasy v2.0 🌍</footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SESSION ──
+var SESSION_KEY = "speakeasy_session";
+var session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+if (!session) { window.location.href = "/login.html"; }
+
+var userName = session ? session.name : "there";
+var initial = userName.charAt(0).toUpperCase();
+var hour = new Date().getHours();
+var greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+document.getElementById("greetName").textContent = userName;
+document.getElementById("greetSub").textContent = greet + " — ready to level up your communication?";
+document.getElementById("greetAvatar").textContent = initial;
+document.getElementById("headerAvatar").textContent = initial;
+document.getElementById("headerName").textContent = userName;
+
+function logout() { localStorage.removeItem(SESSION_KEY); window.location.href = "/login.html"; }
+
+// ── CONSTANTS ──
+var VOICES = [
+  {id:"en-US-marcus",  name:"Marcus",  desc:"Deep & confident", flag:"🇺🇸"},
+  {id:"en-US-natalie", name:"Natalie", desc:"Warm & friendly",  flag:"🇺🇸"},
+  {id:"en-UK-hazel",   name:"Hazel",   desc:"British & refined",flag:"🇬🇧"},
+  {id:"en-AU-zoe",     name:"Zoe",     desc:"Bright & upbeat",  flag:"🇦🇺"},
+  {id:"en-IN-shilpa",  name:"Shilpa",  desc:"Indian & smooth",  flag:"🇮🇳"},
+];
+
+var LANG_CODES = {English:"en-US",Hindi:"hi-IN",Telugu:"te-IN",Tamil:"ta-IN",Kannada:"kn-IN",Bengali:"bn-IN",Spanish:"es-ES",French:"fr-FR",Arabic:"ar-SA",Japanese:"ja-JP"};
+
+var SCENARIOS = {
+  friend:    {label:"Talking to a Friend",  hint:"Try: 'um I kinda miss you and stuff like…'"},
+  interview: {label:"Interview Intro",       hint:"Try: 'so um I am kinda a developer I guess…'"},
+  apology:   {label:"Giving an Apology",    hint:"Try: 'I mean I guess I maybe messed up'"},
+};
+
+var PRACTICE_PROMPTS = {
+  confidence: ["Introduce yourself to a room of strangers.","Tell your team why your idea is best.","Politely decline an unreasonable request.","Ask your manager for a raise confidently."],
+  interview:  ["Tell me about yourself in 2 minutes.","What is your greatest weakness?","Describe a time you handled a difficult situation.","Where do you see yourself in 5 years?"],
+  emotion:    ["Tell someone you appreciate them.","Express that you are feeling overwhelmed.","Tell a friend you were hurt by something they said.","Comfort a friend going through a tough time."],
+  storytelling:["Tell the story of your most challenging day.","Describe a moment that changed your perspective.","Tell a funny story from your childhood.","Describe your dream future as if it happened."],
+  smalltalk:  ["Start a conversation with someone you just met.","Keep a conversation going after a short answer.","Gracefully end a conversation without being rude.","React to unexpected news in a polite way."],
+  conflict:   ["Calmly tell a colleague their behaviour affects your work.","Respond to unfair criticism without defensiveness.","Apologize sincerely for a mistake at work.","Set a firm boundary with someone who keeps crossing it."],
+};
+
+var PRACTICE_TITLES = {confidence:"💪 Confidence Builder",interview:"🎯 Interview Prep",emotion:"❤️ Emotional Expression",storytelling:"📖 Storytelling",smalltalk:"☕ Small Talk",conflict:"🤝 Conflict Resolution"};
+
+// ── STATE ──
+var state = {
+  scenario:"friend", language:"English", langCode:"en-US",
+  isRecording:false, transcript:"", suggestion:"",
+  selectedVoice:"en-US-marcus", sessions:0, totalWords:0,
+  history:[], recognition:null, currentAudio:null,
+  clarityScores:[], bestScore:0,
+};
+
+var practiceState = {type:null, promptIndex:0, isRecording:false, transcript:"", recognition:null};
+
+// ── INIT ──
+buildVoiceGrid();
+buildWaveform();
+buildAchievements();
+fetch("/api/health").then(function(r){return r.json()}).then(function(d){
+  if(!d.groq) showToast("⚠️ Groq key missing","error");
+  if(!d.murf) showToast("⚠️ Murf key missing","error");
+}).catch(function(){showToast("⚠️ Server not running. Run: npm start","error")});
+
+function buildVoiceGrid() {
+  var html = "";
+  for (var i=0;i<VOICES.length;i++) {
+    var v = VOICES[i];
+    html += '<div class="voice-option '+(v.id===state.selectedVoice?"selected":"")+'" onclick="selectVoice(\''+v.id+'\',this)">';
+    html += '<div class="voice-name">'+v.flag+' '+v.name+'</div>';
+    html += '<div class="voice-desc">'+v.desc+'</div></div>';
+  }
+  document.getElementById("voiceGrid").innerHTML = html;
+}
+
+function buildWaveform() {
+  var html = "";
+  for (var i=0;i<32;i++) html += '<div class="wbar"></div>';
+  document.getElementById("waveform").innerHTML = html;
+}
+
+// ── SECTION SWITCH ──
+function switchSection(name, btn) {
+  document.querySelectorAll(".section-tab").forEach(function(t){t.classList.remove("active")});
+  btn.classList.add("active");
+  document.getElementById("coachSection").classList.toggle("active", name==="coach");
+  document.getElementById("practiceSection").classList.toggle("active", name==="practice");
+  document.getElementById("dashboardSection").classList.toggle("active", name==="dashboard");
+  if (name==="dashboard") { updateDashboard(); setTimeout(renderChart, 100); }
+}
+
+// ── SCENARIO & LANGUAGE ──
+function setScenario(btn) {
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active")});
+  btn.classList.add("active");
+  state.scenario = btn.dataset.scenario;
+  resetAll();
+  document.getElementById("micSubtitle").textContent = SCENARIOS[state.scenario].hint;
+}
+
+function setLanguage(lang) {
+  state.language = lang;
+  state.langCode = LANG_CODES[lang] || "en-US";
+  showToast("Language: "+lang, "success");
+}
+
+function selectVoice(id, el) {
+  state.selectedVoice = id;
+  document.querySelectorAll(".voice-option").forEach(function(e){e.classList.remove("selected")});
+  el.classList.add("selected");
+  var v = VOICES.filter(function(v){return v.id===id})[0];
+  showToast("Voice: "+v.name, "success");
+}
+
+// ── MIC ──
+function toggleRecord() { state.isRecording ? stopRecording() : startRecording(); }
+
+function startRecording() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { showToast("Use Google Chrome!", "error"); return; }
+  state.recognition = new SR();
+  state.recognition.lang = state.langCode;
+  state.recognition.interimResults = true;
+  state.recognition.onstart = function() {
+    state.isRecording = true;
+    document.getElementById("micBtn").classList.add("recording");
+    document.getElementById("micTitle").textContent = "Listening…";
+    document.getElementById("micSubtitle").innerHTML = '<span class="rec-badge"><span class="rec-dot"></span>REC</span> Speak now — click mic to stop';
+    setWaveform(true, true);
+    clearBoxes();
+  };
+  state.recognition.onresult = function(e) {
+    var t = Array.from(e.results).map(function(r){return r[0].transcript}).join("");
+    document.getElementById("transcript").textContent = t;
+    state.transcript = t;
+  };
+  state.recognition.onerror = function(e) { showToast("Mic error: "+e.error, "error"); stopRecording(); };
+  state.recognition.onend = function() {
+    stopRecording();
+    if (state.transcript.trim()) {
+      showFillerHighlight(state.transcript);
+      getAISuggestion();
+    }
+  };
+  state.recognition.start();
+}
+
+function stopRecording() {
+  state.isRecording = false;
+  document.getElementById("micBtn").classList.remove("recording");
+  document.getElementById("micTitle").textContent = "Click to Speak";
+  document.getElementById("micSubtitle").textContent = SCENARIOS[state.scenario].hint;
+  setWaveform(true, false);
+  if (state.recognition) { try { state.recognition.stop(); } catch(e) {} }
+}
+
+function setWaveform(show, animate) {
+  var wf = document.getElementById("waveform");
+  wf.classList.toggle("show", show);
+  wf.classList.toggle("animating", animate);
+}
+
+// ── FILLER + EMOTION ──
+function showFillerHighlight(text) {
+  var fillers = ["um","uh","like","kinda","sorta","stuff","i guess","you know","basically","literally","actually","right","i mean","well","anyway"];
+  var html = text;
+  var count = 0;
+  for (var i=0; i<fillers.length; i++) {
+    var fw = fillers[i];
+    var escaped = fw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var regex = new RegExp("\\b(" + escaped + ")\\b", "gi");
+    var matches = text.match(regex);
+    if (matches) count += matches.length;
+    html = html.replace(regex, '<span class="filler-word">$1</span>');
+  }
+  document.getElementById("transcript").innerHTML = html;
+  document.getElementById("emotionRow").style.display = "flex";
+  document.getElementById("fillerCounter").textContent = count + " filler word" + (count===1?"":"s") + " detected";
+  detectEmotion(text, count);
+}
+
+function detectEmotion(text, fillerCount) {
+  var t = text.toLowerCase();
+  var nervous = ["um","uh","i guess","worried","anxious","nervous","not sure","maybe","kinda"];
+  var angry   = ["angry","frustrated","hate","awful","worst","unfair","ridiculous","annoyed"];
+  var sad     = ["sad","miss","sorry","hurt","lonely","disappointed","wish","regret"];
+  var excited = ["amazing","excited","love","awesome","fantastic","great","happy","wonderful"];
+  var confident = ["definitely","absolutely","certain","confident","sure","strongly","clearly"];
+
+  var ns = 0, as = 0, ss = 0, es = 0, cs = 0;
+  for (var i=0;i<nervous.length;i++) if(t.indexOf(nervous[i])>-1) ns++;
+  for (var i=0;i<angry.length;i++) if(t.indexOf(angry[i])>-1) as++;
+  for (var i=0;i<sad.length;i++) if(t.indexOf(sad[i])>-1) ss++;
+  for (var i=0;i<excited.length;i++) if(t.indexOf(excited[i])>-1) es++;
+  for (var i=0;i<confident.length;i++) if(t.indexOf(confident[i])>-1) cs++;
+  ns += Math.min(fillerCount, 3);
+
+  var badge = document.getElementById("emotionBadge");
+  var max = Math.max(ns, as, ss, es, cs);
+  if (max === 0) { badge.textContent="😐 Neutral"; badge.style.cssText="background:rgba(136,136,153,.12);border-color:var(--muted2);color:var(--muted2)"; }
+  else if (max===ns) { badge.textContent="😰 Nervous"; badge.style.cssText="background:rgba(87,212,255,.12);border-color:var(--accent2);color:var(--accent2)"; }
+  else if (max===as) { badge.textContent="😠 Frustrated"; badge.style.cssText="background:rgba(255,107,138,.12);border-color:var(--accent3);color:var(--accent3)"; }
+  else if (max===ss) { badge.textContent="😢 Sad"; badge.style.cssText="background:rgba(197,123,255,.12);border-color:var(--accent4);color:var(--accent4)"; }
+  else if (max===es) { badge.textContent="🤩 Excited"; badge.style.cssText="background:rgba(255,170,0,.12);border-color:#ffaa00;color:#ffaa00"; }
+  else if (max===cs) { badge.textContent="💪 Confident"; badge.style.cssText="background:rgba(168,255,87,.12);border-color:var(--accent);color:var(--accent)"; }
+}
+
+// ── AI SUGGEST ──
+async function getAISuggestion() {
+  if (!state.transcript.trim()) return;
+  document.getElementById("spinner").classList.add("show");
+  document.getElementById("mainCard").classList.remove("has-suggestion");
+  try {
+    var res = await fetch("/api/suggest", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({text:state.transcript, scenario:state.scenario, language:state.language}),
+    });
+    var data = await res.json();
+    if (!res.ok) { showToast("AI error: "+(data.error||"unknown"), "error"); return; }
+    state.suggestion = data.suggestion;
+    var box = document.getElementById("suggestion");
+    box.textContent = "";
+    typeText(box, data.suggestion, function() {
+      box.classList.add("glow");
+      document.getElementById("mainCard").classList.add("has-suggestion");
+      document.getElementById("speakBtn").disabled = false;
+      document.getElementById("redoBtn").disabled = false;
+      document.getElementById("compareCard").style.display = "block";
+      updateMetrics();
+      addHistory();
+    });
+  } catch(err) { showToast("Could not reach server.", "error"); }
+  finally { document.getElementById("spinner").classList.remove("show"); }
+}
+
+function typeText(el, text, onDone) {
+  var i = 0;
+  var iv = setInterval(function() {
+    el.textContent = text.slice(0, ++i);
+    if (i >= text.length) { clearInterval(iv); if (onDone) onDone(); }
+  }, 18);
+}
+
+// ── MURF ──
+async function speakSuggestion() {
+  if (!state.suggestion) return;
+  var btn = document.getElementById("speakBtn");
+  btn.disabled = true; btn.textContent = "⏳ Generating…";
+  if (state.currentAudio) { state.currentAudio.pause(); state.currentAudio = null; }
+  try {
+    var res = await fetch("/api/speak", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({text:state.suggestion, voiceId:state.selectedVoice}),
+    });
+    var data = await res.json();
+    if (!res.ok) { showToast("Murf error: "+(data.error||"unknown"), "error"); btn.disabled=false; btn.innerHTML="🔊 Play with Murf Voice"; return; }
+    var audio = new Audio(data.audioUrl);
+    state.currentAudio = audio;
+    audio.play();
+    btn.textContent = "🔊 Playing…";
+    document.getElementById("murfSide") && document.getElementById("murfSide").classList.add("playing-murf");
+    showToast("Murf voice playing!", "success");
+    audio.onended = function() {
+      btn.disabled = false; btn.innerHTML = "🔊 Play with Murf Voice";
+      document.getElementById("murfSide") && document.getElementById("murfSide").classList.remove("playing-murf");
+    };
+  } catch(err) { showToast("Server error.", "error"); btn.disabled=false; btn.innerHTML="🔊 Play with Murf Voice"; }
+}
+
+// ── COMPARE ──
+function highlightYour() {
+  var side = document.getElementById("yourSide");
+  side.classList.add("playing");
+  var tbox = document.getElementById("transcript");
+  tbox.style.boxShadow = "0 0 20px rgba(255,107,138,0.3)";
+  tbox.style.borderColor = "var(--accent3)";
+  setTimeout(function() {
+    side.classList.remove("playing");
+    tbox.style.boxShadow = "";
+    tbox.style.borderColor = "";
+  }, 2000);
+}
+
+// ── METRICS ──
+function updateMetrics() {
+  state.sessions++;
+  var words = state.suggestion.split(/\s+/).length;
+  state.totalWords += words;
+  var rawLower = state.transcript.toLowerCase();
+  var fillers = ["um","uh","like","kinda","sorta","stuff","i guess","you know","basically","literally","actually"];
+  var fc = 0;
+  for (var i=0;i<fillers.length;i++) if(rawLower.indexOf(fillers[i])>-1) fc++;
+  var clarity = Math.min(100, Math.round((1 - fc/Math.max(state.transcript.split(" ").length,1))*100));
+
+  document.getElementById("sessionCount").textContent = state.sessions;
+  document.getElementById("clarityScore").textContent = clarity+"%";
+  document.getElementById("wordsRefined").textContent = state.totalWords;
+  setTimeout(function(){
+    document.getElementById("sessionBar").style.width = Math.min(state.sessions*10,100)+"%";
+    document.getElementById("clarityBar").style.width = clarity+"%";
+    document.getElementById("wordsBar").style.width = Math.min(state.totalWords/2,100)+"%";
+  }, 100);
+
+  state.clarityScores.push(clarity);
+  if (clarity > state.bestScore) state.bestScore = clarity;
+  if (state.clarityScores.length > 7) state.clarityScores.shift();
+}
+
+function addHistory() {
+  state.history.unshift({scenario:state.scenario, language:state.language, before:state.transcript, after:state.suggestion, time:new Date().toLocaleTimeString()});
+  var html = "";
+  var items = state.history.slice(0,5);
+  for (var i=0;i<items.length;i++) {
+    var h = items[i];
+    html += '<div class="history-item"><div class="history-meta"><span class="history-scenario">'+SCENARIOS[h.scenario].label+'</span><span class="history-time">'+h.time+'</span></div>';
+    html += '<div class="history-before">❝ '+h.before.slice(0,80)+(h.before.length>80?"…":"")+'</div>';
+    html += '<div class="history-after">✨ '+h.after.slice(0,100)+(h.after.length>100?"…":"")+'</div></div>';
+  }
+  document.getElementById("historyList").innerHTML = html || '<div class="empty-history">No sessions yet.</div>';
+}
+
+function clearBoxes() {
+  document.getElementById("transcript").textContent = "";
+  document.getElementById("suggestion").textContent = "";
+  document.getElementById("suggestion").classList.remove("glow");
+  document.getElementById("mainCard").classList.remove("has-suggestion");
+  document.getElementById("speakBtn").disabled = true;
+  document.getElementById("redoBtn").disabled = true;
+  document.getElementById("emotionRow").style.display = "none";
+  document.getElementById("compareCard").style.display = "none";
+  state.transcript = ""; state.suggestion = "";
+}
+
+function resetAll() { clearBoxes(); setWaveform(false,false); }
+function copyText() {
+  if (!state.suggestion) return showToast("Nothing to copy yet.", "error");
+  navigator.clipboard.writeText(state.suggestion).then(function(){showToast("Copied!","success")}).catch(function(){showToast("Copy failed.","error")});
+}
+
+// ── PRACTICE ──
+function startPractice(type) {
+  practiceState.type = type; practiceState.promptIndex = 0;
+  document.getElementById("arenaTitle").textContent = PRACTICE_TITLES[type];
+  document.getElementById("practicePicker").style.display = "none";
+  document.getElementById("practiceArena").classList.add("show");
+  loadPrompt();
+}
+function exitPractice() {
+  document.getElementById("practiceArena").classList.remove("show");
+  document.getElementById("practicePicker").style.display = "block";
+  document.getElementById("scoreReveal").classList.remove("show");
+  document.getElementById("practiceTranscript").textContent = "";
+}
+function loadPrompt() {
+  var prompts = PRACTICE_PROMPTS[practiceState.type];
+  document.getElementById("promptText").textContent = prompts[practiceState.promptIndex % prompts.length];
+  document.getElementById("scoreReveal").classList.remove("show");
+  document.getElementById("practiceTranscript").textContent = "";
+  document.getElementById("practiceStatus").textContent = "Click mic and respond to the prompt";
+  practiceState.transcript = "";
+}
+function nextPrompt() { practiceState.promptIndex++; loadPrompt(); }
+function togglePracticeRecord() { practiceState.isRecording ? stopPracticeRecord() : startPracticeRecord(); }
+function startPracticeRecord() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { showToast("Use Google Chrome!", "error"); return; }
+  practiceState.recognition = new SR();
+  practiceState.recognition.lang = "en-US";
+  practiceState.recognition.interimResults = true;
+  practiceState.recognition.onstart = function() {
+    practiceState.isRecording = true;
+    document.getElementById("pmicBtn").classList.add("recording");
+    document.getElementById("practiceStatus").innerHTML = '<span class="rec-badge"><span class="rec-dot"></span>REC</span> Speak your response…';
+  };
+  practiceState.recognition.onresult = function(e) {
+    var t = Array.from(e.results).map(function(r){return r[0].transcript}).join("");
+    document.getElementById("practiceTranscript").textContent = t;
+    practiceState.transcript = t;
+  };
+  practiceState.recognition.onerror = function(e) { showToast("Mic error: "+e.error,"error"); stopPracticeRecord(); };
+  practiceState.recognition.onend = function() { stopPracticeRecord(); if(practiceState.transcript.trim()) scorePractice(); };
+  practiceState.recognition.start();
+}
+function stopPracticeRecord() {
+  practiceState.isRecording = false;
+  document.getElementById("pmicBtn").classList.remove("recording");
+  document.getElementById("practiceStatus").textContent = "Processing…";
+  if (practiceState.recognition) { try { practiceState.recognition.stop(); } catch(e) {} }
+}
+async function scorePractice() {
+  var prompt = document.getElementById("promptText").textContent;
+  var scorePrompt = 'You are a communication coach. Score this spoken response.\nPrompt: "'+prompt+'"\nResponse: "'+practiceState.transcript+'"\nReply ONLY in JSON: {"score":78,"title":"Good job!","feedback":[{"icon":"✅","text":"Something good"},{"icon":"💡","text":"Something to improve"},{"icon":"🎯","text":"A specific tip"}]}';
+  try {
+    var res = await fetch("/api/suggest",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:scorePrompt,scenario:"friend",language:"English"})});
+    var data = await res.json();
+    var result;
+    try { result = JSON.parse(data.suggestion.replace(/```json|```/g,"").trim()); }
+    catch(e) { result = {score:72,title:"Good effort!",feedback:[{icon:"✅",text:"You gave a clear response."},{icon:"💡",text:"Add more specific details."},{icon:"🎯",text:"Speak slower for more impact."}]}; }
+    showScore(result);
+  } catch(err) {
+    showScore({score:65,title:"Keep practicing!",feedback:[{icon:"✅",text:"You tried — that takes courage!"},{icon:"💡",text:"Be more specific next time."},{icon:"🎯",text:"Record yourself and listen back."}]});
+  }
+}
+function showScore(result) {
+  var color = result.score>=80?"var(--accent)":result.score>=60?"var(--accent2)":"var(--accent3)";
+  document.getElementById("bigScore").textContent = result.score;
+  document.getElementById("bigScore").style.color = color;
+  document.getElementById("scoreTitle").textContent = result.title;
+  var html = "";
+  for (var i=0;i<result.feedback.length;i++) {
+    html += '<div class="feedback-item"><span>'+result.feedback[i].icon+'</span><span>'+result.feedback[i].text+'</span></div>';
+  }
+  document.getElementById("feedbackList").innerHTML = html;
+  document.getElementById("scoreReveal").classList.add("show");
+  document.getElementById("practiceStatus").textContent = "Scored! See feedback below.";
+}
+
+// ── DASHBOARD ──
+function updateDashboard() {
+  var scores = state.clarityScores;
+  var sessions = state.sessions;
+  var best = state.bestScore;
+  var avg = scores.length ? Math.round(scores.reduce(function(a,b){return a+b},0)/scores.length) : 0;
+  var improve = scores.length>=2 ? scores[scores.length-1]-scores[0] : 0;
+
+  document.getElementById("improvePct").textContent = (improve>=0?"+":"")+improve+"%";
+  document.getElementById("improvePct").style.color = improve>=0?"var(--accent)":"var(--accent3)";
+  document.getElementById("wSessions").textContent = sessions;
+  document.getElementById("wAvg").textContent = avg ? avg+"%" : "—";
+  document.getElementById("wBest").textContent = best ? best+"%" : "—";
+
+  if (sessions===0) { document.getElementById("improveText").textContent="Keep practicing!"; document.getElementById("improveSub").textContent="Complete sessions to unlock stats"; }
+  else if (improve>=20) { document.getElementById("improveText").textContent="🔥 You're on fire! Amazing progress!"; document.getElementById("improveSub").textContent="Clarity jumped "+improve+"% since you started!"; }
+  else if (improve>=5) { document.getElementById("improveText").textContent="📈 Great improvement!"; document.getElementById("improveSub").textContent="You improved "+improve+"% — keep going!"; }
+  else { document.getElementById("improveText").textContent="👍 Steady progress!"; document.getElementById("improveSub").textContent="Every session counts. Keep it up!"; }
+
+  updateTips(avg, sessions);
+  buildAchievements();
+}
+
+function updateTips(avg, sessions) {
+  var tips = [];
+  if (sessions===0) { tips.push({icon:"🎤",title:"Start speaking!",text:"Complete a session in AI Coach to get personalised tips."}); }
+  else {
+    if (avg<60) tips.push({icon:"🔴",title:"Too many filler words",text:"Pause instead of saying um or uh. Take a breath!"});
+    if (avg>=60&&avg<80) tips.push({icon:"🟡",title:"Getting better!",text:"Slow down your speech. Slower = clearer and more confident."});
+    if (avg>=80) tips.push({icon:"🟢",title:"Excellent clarity!",text:"Now work on adding more emotion and energy to your speech."});
+    if (sessions>=5) tips.push({icon:"💪",title:"Great consistency!",text:"You've done "+sessions+" sessions — fantastic habit building!"});
+    tips.push({icon:"🌍",title:"Try other languages",text:"Switch to Hindi or Telugu and practice in your native language!"});
+    tips.push({icon:"🏋️",title:"Use Practice Mode",text:"Try Interview Prep to prepare for your next job interview!"});
+  }
+  var html = "";
+  for (var i=0;i<Math.min(tips.length,4);i++) {
+    html += '<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;margin-bottom:10px">';
+    html += '<span style="font-size:20px">'+tips[i].icon+'</span><div><div style="font-size:13px;font-weight:700;margin-bottom:3px">'+tips[i].title+'</div><div style="font-size:12px;color:var(--muted2);line-height:1.5">'+tips[i].text+'</div></div></div>';
+  }
+  document.getElementById("tipsList").innerHTML = html;
+}
+
+function buildAchievements() {
+  var all = [
+    {icon:"🎤",name:"First Words",   desc:"First session done",       unlocked:state.sessions>=1},
+    {icon:"🔥",name:"On a Roll",     desc:"5 sessions completed",     unlocked:state.sessions>=5},
+    {icon:"💎",name:"Dedicated",     desc:"10 sessions done",         unlocked:state.sessions>=10},
+    {icon:"🌍",name:"Multilingual",  desc:"Used non-English language", unlocked:state.history.some(function(h){return h.language!=="English"})},
+    {icon:"💪",name:"Clarity King",  desc:"Scored 90%+ clarity",      unlocked:state.bestScore>=90},
+    {icon:"🏋️",name:"Practitioner", desc:"Used Practice Mode",        unlocked:practiceState.promptIndex>0},
+    {icon:"🎯",name:"Sharp Shooter", desc:"80%+ clarity 3 times",      unlocked:state.clarityScores.filter(function(s){return s>=80}).length>=3},
+    {icon:"⚡",name:"Speed Learner", desc:"3 sessions in one go",      unlocked:state.sessions>=3},
+  ];
+  var html = "";
+  for (var i=0;i<all.length;i++) {
+    var a = all[i];
+    html += '<div class="achievement '+(a.unlocked?"unlocked":"")+'" style="opacity:'+(a.unlocked?1:0.4)+'">';
+    html += '<div class="ach-icon">'+a.icon+'</div><div class="ach-name" style="color:'+(a.unlocked?"var(--accent)":"var(--text)")+'">'+a.name+'</div>';
+    html += '<div class="ach-desc">'+a.desc+'</div>';
+    html += '<div class="ach-status" style="color:'+(a.unlocked?"var(--accent)":"var(--muted)")+'">'+( a.unlocked?"✅ UNLOCKED":"🔒 LOCKED")+'</div></div>';
+  }
+  document.getElementById("achieveGrid").innerHTML = html;
+}
+
+function renderChart() {
+  var canvas = document.getElementById("progressChart");
+  if (!canvas) return;
+  var ctx = canvas.getContext("2d");
+  var data = state.clarityScores;
+  var w = canvas.offsetWidth || 600;
+  var h = 140;
+  canvas.width = w; canvas.height = h;
+  ctx.clearRect(0,0,w,h);
+
+  if (data.length===0) {
+    ctx.fillStyle="rgba(136,136,153,0.4)";
+    ctx.font="14px Syne,sans-serif";
+    ctx.textAlign="center";
+    ctx.fillText("Complete sessions to see your chart!", w/2, h/2);
+    return;
+  }
+
+  var pad={top:10,right:20,bottom:30,left:36};
+  var cw=w-pad.left-pad.right, ch=h-pad.top-pad.bottom;
+
+  // Grid
+  ctx.strokeStyle="rgba(255,255,255,0.05)"; ctx.lineWidth=1;
+  [0,25,50,75,100].forEach(function(v){
+    var y=pad.top+ch-((v/100)*ch);
+    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(pad.left+cw,y); ctx.stroke();
+    ctx.fillStyle="rgba(136,136,153,0.6)"; ctx.font="10px monospace"; ctx.textAlign="right";
+    ctx.fillText(v+"%", pad.left-4, y+4);
+  });
+
+  if (data.length===1) {
+    var x=pad.left+cw/2, y=pad.top+ch-((data[0]/100)*ch);
+    ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fillStyle="#a8ff57"; ctx.fill();
+    return;
+  }
+
+  var step = cw/(data.length-1);
+  var grad = ctx.createLinearGradient(0,pad.top,0,pad.top+ch);
+  grad.addColorStop(0,"rgba(168,255,87,0.3)"); grad.addColorStop(1,"rgba(168,255,87,0)");
+
+  ctx.beginPath();
+  for (var i=0;i<data.length;i++) {
+    var x=pad.left+i*step, y=pad.top+ch-((data[i]/100)*ch);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  }
+  ctx.lineTo(pad.left+(data.length-1)*step,pad.top+ch);
+  ctx.lineTo(pad.left,pad.top+ch);
+  ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+
+  ctx.beginPath(); ctx.strokeStyle="#a8ff57"; ctx.lineWidth=2.5; ctx.lineJoin="round";
+  for (var i=0;i<data.length;i++) {
+    var x=pad.left+i*step, y=pad.top+ch-((data[i]/100)*ch);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  for (var i=0;i<data.length;i++) {
+    var x=pad.left+i*step, y=pad.top+ch-((data[i]/100)*ch);
+    ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fillStyle="#a8ff57"; ctx.fill();
+    ctx.strokeStyle="#080810"; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle="rgba(136,136,153,0.8)"; ctx.font="9px monospace"; ctx.textAlign="center";
+    ctx.fillText(data[i]+"%", x, y-8);
+  }
+}
+
+// ── TOAST ──
+function showToast(msg, type) {
+  var t = document.getElementById("toast");
+  t.textContent = msg; t.className = "toast "+(type||"success"); t.classList.add("show");
+  setTimeout(function(){ t.classList.remove("show"); }, 3000);
+}
+</script>
+</body>
+</html>

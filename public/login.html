@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Speakeasy – Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:#080810; --surface:#0f0f1a; --card:#141422;
+      --border:#252540; --border2:#303055;
+      --accent:#a8ff57; --accent2:#57d4ff; --accent3:#ff6b8a;
+      --text:#e8e8f5; --muted:#60607a; --muted2:#888899;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+
+    .bg-layer{position:fixed;inset:0;pointer-events:none;z-index:0;
+      background-image:linear-gradient(rgba(168,255,87,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(168,255,87,.025) 1px,transparent 1px);
+      background-size:52px 52px}
+    .blob{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;animation:bdrift 14s ease-in-out infinite alternate}
+    .blob-1{width:500px;height:500px;background:var(--accent);opacity:.07;top:-150px;left:-150px}
+    .blob-2{width:400px;height:400px;background:var(--accent2);opacity:.06;bottom:-100px;right:-100px;animation-delay:-5s}
+    .blob-3{width:300px;height:300px;background:var(--accent3);opacity:.05;top:50%;left:50%;animation-delay:-8s}
+    @keyframes bdrift{from{transform:translate(0,0) scale(1)}to{transform:translate(25px,15px) scale(1.07)}}
+
+    /* CARD */
+    .login-wrap{position:relative;z-index:1;width:100%;max-width:440px;padding:24px}
+
+    .login-card{
+      background:var(--card);border:1.5px solid var(--border);
+      border-radius:28px;padding:44px 40px;
+      box-shadow:0 24px 80px rgba(0,0,0,.5);
+      animation:fadeup .5s ease forwards;
+    }
+    @keyframes fadeup{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+    /* TOP SHIMMER */
+    .login-card::before{
+      content:'';display:block;height:2px;
+      background:linear-gradient(90deg,transparent,var(--accent),transparent);
+      border-radius:99px;margin-bottom:36px;
+    }
+
+    /* LOGO */
+    .logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;justify-content:center}
+    .logo-mark{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,var(--accent),#6dde00);display:grid;place-items:center;font-size:24px;box-shadow:0 0 24px rgba(168,255,87,.3)}
+    .logo-name{font-size:26px;font-weight:800;letter-spacing:-.8px}
+    .logo-name span{color:var(--accent)}
+
+    /* TABS */
+    .auth-tabs{display:flex;background:var(--surface);border-radius:14px;padding:4px;margin-bottom:32px;border:1.5px solid var(--border)}
+    .auth-tab{flex:1;padding:10px;border-radius:10px;border:none;background:transparent;color:var(--muted);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+    .auth-tab.active{background:var(--card);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+
+    /* FORM */
+    .form-group{margin-bottom:18px}
+    .form-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:block}
+    .form-input{
+      width:100%;padding:13px 16px;
+      background:var(--surface);border:1.5px solid var(--border);
+      border-radius:12px;color:var(--text);
+      font-family:'Syne',sans-serif;font-size:15px;
+      outline:none;transition:all .2s;
+    }
+    .form-input::placeholder{color:var(--muted)}
+    .form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(168,255,87,.1)}
+
+    .form-input.error{border-color:var(--accent3)}
+
+    /* PASSWORD WRAPPER */
+    .pw-wrap{position:relative}
+    .pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px}
+    .pw-toggle:hover{color:var(--text)}
+
+    /* SUBMIT BTN */
+    .submit-btn{
+      width:100%;padding:14px;margin-top:8px;
+      background:var(--accent);color:#080810;
+      border:none;border-radius:14px;
+      font-family:'Syne',sans-serif;font-size:16px;font-weight:800;
+      cursor:pointer;transition:all .2s;letter-spacing:.2px;
+    }
+    .submit-btn:hover{filter:brightness(1.1);transform:translateY(-2px);box-shadow:0 8px 24px rgba(168,255,87,.3)}
+    .submit-btn:active{transform:translateY(0)}
+    .submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+    /* DIVIDER */
+    .divider{display:flex;align-items:center;gap:12px;margin:22px 0}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+    .divider span{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:1px}
+
+    /* GOOGLE BTN */
+    .google-btn{
+      width:100%;padding:13px;
+      background:var(--surface);color:var(--text);
+      border:1.5px solid var(--border);border-radius:14px;
+      font-family:'Syne',sans-serif;font-size:14px;font-weight:700;
+      cursor:pointer;transition:all .2s;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+    }
+    .google-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+
+    /* ERROR MSG */
+    .error-msg{font-size:12px;color:var(--accent3);margin-top:6px;display:none}
+    .error-msg.show{display:block}
+
+    /* SUCCESS */
+    .success-overlay{
+      position:absolute;inset:0;background:var(--card);
+      border-radius:28px;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:16px;
+      opacity:0;pointer-events:none;transition:opacity .4s;z-index:10;
+    }
+    .success-overlay.show{opacity:1;pointer-events:all}
+    .success-icon{font-size:56px;animation:pop .4s ease}
+    @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+    .success-title{font-size:22px;font-weight:800;color:var(--accent)}
+    .success-sub{font-size:14px;color:var(--muted2);text-align:center}
+
+    /* FORGOT */
+    .forgot{text-align:right;margin-top:-10px;margin-bottom:18px}
+    .forgot a{font-size:12px;color:var(--muted);text-decoration:none;font-family:'DM Mono',monospace;transition:color .2s}
+    .forgot a:hover{color:var(--accent)}
+
+    /* FOOTER NOTE */
+    .footer-note{text-align:center;margin-top:24px;font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
+    .footer-note span{color:var(--accent)}
+
+    /* STRENGTH BAR */
+    .strength-wrap{margin-top:8px;display:none}
+    .strength-wrap.show{display:block}
+    .strength-bar{height:3px;border-radius:99px;background:var(--border);overflow:hidden}
+    .strength-fill{height:100%;border-radius:99px;width:0;transition:all .3s}
+    .strength-label{font-size:11px;color:var(--muted);margin-top:4px;font-family:'DM Mono',monospace}
+  </style>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<div class="login-wrap">
+  <div class="login-card" style="position:relative">
+
+    <!-- Logo -->
+    <div class="logo">
+      <div class="logo-mark">🎙️</div>
+      <div class="logo-name">Speak<span>easy</span></div>
+    </div>
+
+    <!-- Auth Tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="loginTab"  onclick="switchTab('login')">Sign In</button>
+      <button class="auth-tab"        id="signupTab" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com"/>
+        <div class="error-msg" id="loginEmailErr">Please enter a valid email.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="pw-wrap">
+          <input type="password" class="form-input" id="loginPassword" placeholder="Enter your password"/>
+          <button class="pw-toggle" onclick="togglePw('loginPassword',this)">👁</button>
+        </div>
+        <div class="error-msg" id="loginPassErr">Password must be at least 6 characters.</div>
+      </div>
+      <div class="forgot"><a href="#">Forgot password?</a></div>
+      <button class="submit-btn" onclick="handleLogin()">Sign In →</button>
+
+      <div class="divider"><span>OR</span></div>
+      <button class="google-btn" onclick="handleGoogle()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="signupForm" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" id="signupName" placeholder="Aliya Kousar"/>
+        <div class="error-msg" id="signupNameErr">Please enter your name.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="signupEmail" placeholder="you@example.com"/>
+        <div class="error-msg" id="signupEmailErr">Please enter a valid email.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="pw-wrap">
+          <input type="password" class="form-input" id="signupPassword" placeholder="Create a strong password" oninput="checkStrength(this.value)"/>
+          <button class="pw-toggle" onclick="togglePw('signupPassword',this)">👁</button>
+        </div>
+        <div class="strength-wrap" id="strengthWrap">
+          <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+          <div class="strength-label" id="strengthLabel">Weak</div>
+        </div>
+        <div class="error-msg" id="signupPassErr">Password must be at least 6 characters.</div>
+      </div>
+      <button class="submit-btn" onclick="handleSignup()">Create Account →</button>
+
+      <div class="divider"><span>OR</span></div>
+      <button class="google-btn" onclick="handleGoogle()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+    </div>
+
+    <!-- SUCCESS OVERLAY -->
+    <div class="success-overlay" id="successOverlay">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Welcome!</div>
+      <div class="success-sub">Taking you to Speakeasy…</div>
+    </div>
+
+  </div>
+
+  <div class="footer-note">Built for <span>Murf AI Hackathon</span> 🚀</div>
+</div>
+
+<script>
+// Simple in-memory user store (for demo)
+const USERS_KEY = "speakeasy_users";
+const SESSION_KEY = "speakeasy_session";
+
+function getUsers(){ try{ return JSON.parse(localStorage.getItem(USERS_KEY)||"[]") }catch{return []} }
+function saveUsers(u){ localStorage.setItem(USERS_KEY, JSON.stringify(u)) }
+function setSession(u){ localStorage.setItem(SESSION_KEY, JSON.stringify(u)) }
+
+// If already logged in, redirect
+if(localStorage.getItem(SESSION_KEY)){
+  window.location.href = "/";
+}
+
+function switchTab(tab){
+  document.getElementById("loginTab").classList.toggle("active", tab==="login");
+  document.getElementById("signupTab").classList.toggle("active", tab==="signup");
+  document.getElementById("loginForm").style.display  = tab==="login"  ? "block" : "none";
+  document.getElementById("signupForm").style.display = tab==="signup" ? "block" : "none";
+}
+
+function togglePw(id, btn){
+  const inp = document.getElementById(id);
+  if(inp.type==="password"){ inp.type="text"; btn.textContent="🙈"; }
+  else { inp.type="password"; btn.textContent="👁"; }
+}
+
+function checkStrength(pw){
+  const wrap = document.getElementById("strengthWrap");
+  const fill = document.getElementById("strengthFill");
+  const label = document.getElementById("strengthLabel");
+  if(!pw){ wrap.classList.remove("show"); return; }
+  wrap.classList.add("show");
+  let score = 0;
+  if(pw.length >= 8) score++;
+  if(/[A-Z]/.test(pw)) score++;
+  if(/[0-9]/.test(pw)) score++;
+  if(/[^A-Za-z0-9]/.test(pw)) score++;
+  const levels = [
+    {w:"25%", color:"var(--accent3)", label:"Weak"},
+    {w:"50%", color:"#ffaa00",        label:"Fair"},
+    {w:"75%", color:"var(--accent2)", label:"Good"},
+    {w:"100%",color:"var(--accent)",  label:"Strong 💪"},
+  ];
+  const l = levels[Math.min(score, 3)];
+  fill.style.width = l.w;
+  fill.style.background = l.color;
+  label.textContent = l.label;
+  label.style.color = l.color;
+}
+
+function showErr(id, show){ document.getElementById(id).classList.toggle("show", show) }
+function markErr(id, show){
+  document.getElementById(id).classList.toggle("error", show);
+}
+
+function handleLogin(){
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass  = document.getElementById("loginPassword").value;
+  let ok = true;
+
+  if(!email || !/\S+@\S+\.\S+/.test(email)){ markErr("loginEmail",true); showErr("loginEmailErr",true); ok=false; }
+  else { markErr("loginEmail",false); showErr("loginEmailErr",false); }
+
+  if(pass.length < 6){ markErr("loginPassword",true); showErr("loginPassErr",true); ok=false; }
+  else { markErr("loginPassword",false); showErr("loginPassErr",false); }
+
+  if(!ok) return;
+
+  const users = getUsers();
+  const user = users.find(u => u.email===email && u.password===pass);
+  if(!user){
+    markErr("loginEmail",true); markErr("loginPassword",true);
+    showErr("loginEmailErr",false);
+    showErr("loginPassErr",true);
+    document.getElementById("loginPassErr").textContent = "Invalid email or password.";
+    return;
+  }
+
+  setSession({name:user.name, email:user.email});
+  showSuccess(user.name);
+}
+
+function handleSignup(){
+  const name  = document.getElementById("signupName").value.trim();
+  const email = document.getElementById("signupEmail").value.trim();
+  const pass  = document.getElementById("signupPassword").value;
+  let ok = true;
+
+  if(!name){ markErr("signupName",true); showErr("signupNameErr",true); ok=false; }
+  else { markErr("signupName",false); showErr("signupNameErr",false); }
+
+  if(!email || !/\S+@\S+\.\S+/.test(email)){ markErr("signupEmail",true); showErr("signupEmailErr",true); ok=false; }
+  else { markErr("signupEmail",false); showErr("signupEmailErr",false); }
+
+  if(pass.length < 6){ markErr("signupPassword",true); showErr("signupPassErr",true); ok=false; }
+  else { markErr("signupPassword",false); showErr("signupPassErr",false); }
+
+  if(!ok) return;
+
+  const users = getUsers();
+  if(users.find(u=>u.email===email)){
+    markErr("signupEmail",true);
+    showErr("signupEmailErr",true);
+    document.getElementById("signupEmailErr").textContent = "Email already registered.";
+    return;
+  }
+
+  users.push({name, email, password:pass});
+  saveUsers(users);
+  setSession({name, email});
+  showSuccess(name);
+}
+
+function handleGoogle(){
+  // Demo: auto-login as Google user
+  const gUser = {name:"Google User", email:"user@gmail.com"};
+  setSession(gUser);
+  showSuccess(gUser.name);
+}
+
+function showSuccess(name){
+  document.getElementById("successOverlay").querySelector(".success-sub").textContent =
+    `Welcome back, ${name}! Taking you to Speakeasy…`;
+  document.getElementById("successOverlay").classList.add("show");
+  setTimeout(()=>{ window.location.href = "/" }, 1800);
+}
+
+// Enter key support
+document.addEventListener("keydown", e=>{
+  if(e.key==="Enter"){
+    if(document.getElementById("loginForm").style.display !== "none") handleLogin();
+    else handleSignup();
+  }
+});
+</script>
+</body>
+</html>
