@@ -1,168 +1,186 @@
 # 🎙️ Speakeasy – AI Voice Communication Coach
+> Say what you mean. Mean what you say.
 
-> Voice-first AI coach that listens to how you speak and teaches you to speak better — powered by OpenAI + Murf AI.
+Speakeasy is a voice-first AI communication coach that helps people 
+express themselves clearly and confidently in any language. 
+Speak naturally — AI rewrites your message — Murf AI voices it back 
+in a beautiful human voice!
 
----
 
-## 📁 Project Structure
+## 🌐 Live Demo
+👉 https://speakeazy.vercel.app
 
-```
-speakeasy/
-├── server.js          ← Node.js backend (Express + OpenAI + Murf)
-├── package.json       ← Dependencies
-├── .env.example       ← API key template
-├── .gitignore
-└── public/
-    └── index.html     ← Full frontend (HTML + CSS + JS)
-```
+## 📁 GitHub Repository
+👉 https://github.com/aliya2702/SpeakEasy
 
 ---
 
-## 🚀 Step-by-Step Setup Guide
+## 😟 Problem
+Every day, millions of people lose jobs, relationships and 
+opportunities — not because they lack knowledge — 
+but because they cannot communicate effectively.
 
-### STEP 1 — Install Node.js
-If you don't have Node.js installed:
-- Go to https://nodejs.org
-- Download and install the **LTS version**
-- Verify: open terminal and run `node --version` (should show v18+)
+75% of people suffer from speech anxiety.
+Filler words destroy credibility in seconds.
+Poor communication kills careers before they even begin.
+
+Communication coaches are expensive.
+Practice requires a partner.
+Real time feedback is never available when you need it most.
+
+This is not just a personal problem.
+This is a global communication crisis.
+And nobody was solving it .
 
 ---
 
-### STEP 2 — Open Project in VS Code
-1. Open VS Code
-2. Go to **File → Open Folder**
-3. Select the `speakeasy` folder
-4. Open the integrated terminal: **Terminal → New Terminal**
+## 💡 Solution
+Speakeasy is your personal AI communication coach available 
+Introducing Speakeasy — your personal AI Voice 
+Communication Coach available 24/7 for free!
+✅ Filler words highlighted in red automatically
+✅ Emotion detected from your speech instantly  
+✅ AI rewrites your message with clarity and confidence
+✅ Murf AI Falcon TTS voices it back in human voice
+✅ Practice Mode with 6 challenges and AI scoring
+✅ Progress Dashboard tracking your improvement
+✅ 12 languages supported
+✅ Completely personalised experience
+
+Not just a chatbot. Not just a voice assistant.
+A complete communication training platform —
+built to give everyone the superpower of confident speech!
+
+Simple flow:
+🎤 You Speak → 🧠 AI Rewrites → 🔊 Murf AI Voices It Back → ✨ You Learn!
 
 ---
 
-### STEP 3 — Install Dependencies
-In the VS Code terminal, run:
+## ✨ Features
 
-```bash
+### 🎤 AI Coach
+- Real-time voice input using Web Speech API
+- AI rewrites your message with clarity and confidence
+- Murf AI Falcon TTS voices it back in a beautiful human voice
+- 3 scenarios — Friend, Interview and Apology
+- 12 languages — English, Hindi, Telugu, Tamil, Kannada, 
+  Bengali, Spanish, French, Arabic, Japanese and more
+
+###  Emotion Detection
+- Detects your emotion from speech
+- Shows Nervous, Confident, Excited, Sad or Frustrated
+- Helps you understand how you sound to others
+
+###  Filler Word Highlighter
+- Highlights filler words in red automatically
+- Shows count of filler words detected
+- Helps you become aware of your speech habits
+
+###  Voice Comparison
+- See Your Original words vs Murf AI Enhanced version
+- Side by side comparison card
+- Visual and audio wow moment!
+
+### 🏋️ Practice Mode
+- 6 communication challenges
+  - 💪 Confidence Builder
+  - 🎯 Interview Prep
+  - ❤️ Emotional Expression
+  - 📖 Storytelling
+  - ☕ Small Talk
+  - 🤝 Conflict Resolution
+- AI scores your response out of 100
+- 3 detailed feedback points every session
+- Keep practicing with new prompts!
+
+### 📈 Progress Dashboard
+- Live clarity score chart
+- Improvement percentage tracker
+- Average clarity and best score stats
+- Personalised tips based on your sessions
+- 8 achievements to unlock
+- Weekly progress tracking
+
+### 🔐 Login System
+- Secure sign up and sign in
+- Personalised greeting with your name
+- Session management
+- Good morning/afternoon/evening greeting
+
+---
+
+## 🛠️ Tech Stack
+
+| Technology | Usage |
+|------------|-------|
+| HTML, CSS, JavaScript | Frontend |
+| Node.js + Express | Backend |
+| Groq API + Llama 3.3 | AI Intelligence |
+| Murf AI Falcon TTS | Voice Output |
+| Web Speech API | Microphone Input |
+| Vercel | Deployment |
+
+---
+
+## 🚀 How to Run Locally
+
+### Step 1 — Clone the repository
+git clone https://github.com/aliya2702/SpeakEasy.git
+cd SpeakEasy
+
+### Step 2 — Install dependencies
 npm install
-```
 
-This installs: `express`, `cors`, `dotenv`, `nodemon`
+### Step 3 — Create .env file
+Create a file called .env and add:
 
----
-
-### STEP 4 — Get Your API Keys
-
-#### 🔑 OpenAI API Key
-1. Go to https://platform.openai.com/api-keys
-2. Click **"Create new secret key"**
-3. Copy it (you won't see it again!)
-
-#### 🔑 Murf AI API Key
-1. Go to https://murf.ai
-2. Sign up / Log in
-3. Go to **Dashboard → API → API Keys**
-4. Generate a new key and copy it
-
----
-
-### STEP 5 — Create Your .env File
-In VS Code terminal:
-
-```bash
-# On Mac/Linux:
-cp .env.example .env
-
-# On Windows:
-copy .env.example .env
-```
-
-Then open `.env` and fill in your real keys:
-
-```
-OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxxxxxx
-MURF_API_KEY=your_murf_key_here
+GROQ_API_KEY=your-groq-api-key-here
+MURF_API_KEY=your-murf-api-key-here
 PORT=3000
-```
 
-> ⚠️ NEVER share this file or push it to GitHub!
+### Step 4 — Get API Keys
+- Groq API (Free) → https://console.groq.com
+- Murf API → https://murf.ai
 
----
-
-### STEP 6 — Start the Server
-
-```bash
+### Step 5 — Start the server
 npm start
-```
 
-You should see:
-```
-🎙️  Speakeasy server running at http://localhost:3000
-   OpenAI key: ✅ loaded
-   Murf key:   ✅ loaded
-```
-
----
-
-### STEP 7 — Open the App
-Open your browser and go to:
-
-```
+### Step 6 — Open in Chrome
 http://localhost:3000
-```
 
 ---
 
 ## 🎮 How to Use
 
-1. **Choose a scenario** (Friend / Interview / Apology)
-2. **Click the mic button** — it turns red when listening
-3. **Speak naturally** — say something like *"um I kinda miss you and stuff"*
-4. **Wait 2 seconds** — AI rewrites it instantly
-5. **Click "Play with Murf Voice"** — hear the improved version spoken!
-6. **Check your metrics** — sessions, clarity score, words refined
+1. Sign up with your name and email
+2. Choose a scenario — Friend, Interview or Apology
+3. Choose your language
+4. Click the mic and speak naturally
+5. Watch filler words highlight in red
+6. See your emotion detected automatically
+7. AI rewrites your message instantly
+8. Click Play with Murf Voice and hear the difference!
+9. Go to Practice Mode for structured challenges
+10. Check Dashboard for your progress!
 
 ---
 
-## 🛠️ Development Mode (auto-restart)
-
-```bash
-npm run dev
-```
-
-This uses `nodemon` — the server restarts automatically when you save changes.
+## 🏆 Built For
+Murf AI Hackathon 2026
 
 ---
 
-## 🐛 Troubleshooting
-
-| Problem | Fix |
-|---------|-----|
-| `Cannot find module 'express'` | Run `npm install` |
-| OpenAI key ❌ missing | Check `.env` file has correct key |
-| Murf key ❌ missing | Check `.env` file has correct key |
-| Mic not working | Use Google Chrome (required for Web Speech API) |
-| `EADDRINUSE` port error | Change PORT in `.env` to 3001 |
-| Audio not playing | Check browser allows audio autoplay |
+## 👩 Team
+- Aliya Kousar
+- Hasini
+- Tejasri
 
 ---
 
-## 🏆 Hackathon Demo Flow
-
-Perfect demo script:
-
-1. Select **"Talking to a Friend"**
-2. Click mic, say: *"um I kinda wanted to like tell you I miss you and stuff you know"*
-3. AI suggests: *"I've been thinking about you — I really miss spending time together."*
-4. Click **"Play with Murf Voice"** → audience hears it in a beautiful voice 🎯
-5. Show the **Clarity Score** and **History** cards
+## 📄 License
+MIT License
 
 ---
 
-## 📦 Tech Stack
-
-- **Frontend:** HTML, CSS, JavaScript (Web Speech API)
-- **Backend:** Node.js + Express
-- **AI:** OpenAI GPT-4o-mini
-- **Voice:** Murf AI Falcon TTS
-- **No database needed** — all in-memory for demo
-
----
-
-Built for **Murf AI Hackathon 2025** 🚀
+> Speakeasy — Helping everyone speak confidently 
+> in any language, in any situation! 🎙️
