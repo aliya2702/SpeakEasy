@@ -114,7 +114,7 @@ Simple flow:
 
 User Speech (Web Speech API)
          
-          ↓
+          |
 Frontend (JS + UI)
          
           ↓
