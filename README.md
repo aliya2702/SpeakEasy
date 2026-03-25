@@ -114,16 +114,22 @@ Simple flow:
 
 User Speech (Web Speech API)
           ↓
+          
 Frontend (JS + UI)
           ↓
+          
 Backend (Node.js + Express)
           ↓
+          
 AI Processing (Groq + Llama 3.3)
           ↓
+          
 Text Enhancement + Feedback
           ↓
+          
 Murf AI API (Falcon TTS)
           ↓
+          
 Audio Playback to User
 
 ---
@@ -154,20 +160,25 @@ This transforms learning into experience, not just feedback.
 
 ---
 🔌 API Usage
+
 🧠 Groq API (Llama 3.3)
+
 Used for:
 Grammar correction
 Sentence enhancement
 Feedback generation
 Scoring responses
 Processes user speech into refined communication
+
 🔊 Murf AI API
 Converts AI-enhanced text into natural human voice
 Uses Falcon TTS model for realistic speech output
 Enables voice comparison experience
+
 🎤 Web Speech API
 Captures real-time microphone input
 Converts speech → text instantly in browser
+
 ---
 ## 🎮 How to Use
 
