@@ -113,21 +113,27 @@ Simple flow:
 🧩 Architecture:
 
 User Speech (Web Speech API)
+         
           ↓
           
 Frontend (JS + UI)
+         
           ↓
           
 Backend (Node.js + Express)
+         
           ↓
           
 AI Processing (Groq + Llama 3.3)
+          
           ↓
           
 Text Enhancement + Feedback
+          
           ↓
           
 Murf AI API (Falcon TTS)
+          
           ↓
           
 Audio Playback to User
