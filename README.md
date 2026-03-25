@@ -5,7 +5,7 @@ Speakeasy is a voice-first AI communication coach that helps people
 express themselves clearly and confidently in any language. 
 Speak naturally — AI rewrites your message — Murf AI voices it back 
 in a beautiful human voice!
-
+---
 
 ## 🌐 Live Demo
 👉 https://speakeazy.vercel.app
