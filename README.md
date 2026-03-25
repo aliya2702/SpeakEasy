@@ -7,12 +7,14 @@ Speak naturally — AI rewrites your message — Murf AI voices it back
 in a beautiful human voice!
 ---
 
-## 🌐 Live Demo
+## 🌐 Live App link
 👉 https://speakeazy.vercel.app
 
 ## 📁 GitHub Repository
 👉 https://github.com/aliya2702/SpeakEasy
 
+## 🌐 Live Demo Video 
+👉 https://youtu.be/8D1EQoxv6gE
 ---
 
 ##  Problem
@@ -108,8 +110,36 @@ Simple flow:
 - Good morning/afternoon/evening greeting
 
 ---
+🧩 Architecture
+User Speech (Web Speech API)
+        ↓
+Frontend (JS + UI)
+        ↓
+Backend (Node.js + Express)
+        ↓
+AI Processing (Groq + Llama 3.3)
+        ↓
+Text Enhancement + Feedback
+        ↓
+Murf AI API (Falcon TTS)
+        ↓
+Audio Playback to User
+---
+💙 Why Murf AI?
 
-## 🛠️ Tech Stack
+Murf AI is at the core of Speakeasy’s experience.
+
+Instead of just showing corrected text, Speakeasy:
+
+Lets users hear the perfect version of themselves
+Creates an emotional “before vs after” moment
+Bridges the gap between knowing and speaking
+
+This transforms learning into experience, not just feedback.
+
+---
+
+## 🛠️ Tech Stack 
 
 | Technology | Usage |
 |------------|-------|
@@ -121,7 +151,48 @@ Simple flow:
 | Vercel | Deployment |
 
 ---
+🔌 API Usage
+🧠 Groq API (Llama 3.3)
+Used for:
+Grammar correction
+Sentence enhancement
+Feedback generation
+Scoring responses
+Processes user speech into refined communication
+🔊 Murf AI API
+Converts AI-enhanced text into natural human voice
+Uses Falcon TTS model for realistic speech output
+Enables voice comparison experience
+🎤 Web Speech API
+Captures real-time microphone input
+Converts speech → text instantly in browser
+---
+## 🎮 How to Use
 
+1. Sign up with your name and email
+2. Choose a scenario — Friend, Interview or Apology
+3. Choose your language
+4. Click the mic and speak naturally
+5. Watch filler words highlight in red
+6. See your emotion detected automatically
+7. AI rewrites your message instantly
+8. Click Play with Murf Voice and hear the difference!
+9. Go to Practice Mode for structured challenges
+10. Check Dashboard for your progress!
+---
+🎥 Demo Video
+
+👉 https://youtu.be/8D1EQoxv6gE
+
+Demo Includes:
+
+Real-time speech input
+AI correction in action
+Murf AI voice playback
+Practice mode scoring
+Dashboard analytics
+
+---
 ## 🚀 How to Run Locally
 
 ### Step 1 — Clone the repository
@@ -148,26 +219,13 @@ npm start
 ### Step 6 — Open in Chrome
 http://localhost:3000
 
----
-
-## 🎮 How to Use
-
-1. Sign up with your name and email
-2. Choose a scenario — Friend, Interview or Apology
-3. Choose your language
-4. Click the mic and speak naturally
-5. Watch filler words highlight in red
-6. See your emotion detected automatically
-7. AI rewrites your message instantly
-8. Click Play with Murf Voice and hear the difference!
-9. Go to Practice Mode for structured challenges
-10. Check Dashboard for your progress!
 
 ---
 
 ## 🏆 Built For
 Murf AI Hackathon 2026
-
+🚀 Built for the Murf AI Hackathon — redefining how the world learns communication.
+#murf-ai 
 ---
 
 ## 👩 Team
