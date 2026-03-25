@@ -15,7 +15,7 @@ in a beautiful human voice!
 
 ---
 
-## 😟 Problem
+##  Problem
 Every day, millions of people lose jobs, relationships and 
 opportunities — not because they lack knowledge — 
 but because they cannot communicate effectively.
@@ -38,14 +38,14 @@ And nobody was solving it .
 Speakeasy is your personal AI communication coach available 
 Introducing Speakeasy — your personal AI Voice 
 Communication Coach available 24/7 for free!
-✅ Filler words highlighted in red automatically
-✅ Emotion detected from your speech instantly  
-✅ AI rewrites your message with clarity and confidence
-✅ Murf AI Falcon TTS voices it back in human voice
-✅ Practice Mode with 6 challenges and AI scoring
-✅ Progress Dashboard tracking your improvement
-✅ 12 languages supported
-✅ Completely personalised experience
+* Filler words highlighted in red automatically
+* Emotion detected from your speech instantly  
+* AI rewrites your message with clarity and confidence
+* Murf AI Falcon TTS voices it back in human voice
+*Practice Mode with 6 challenges and AI scoring
+* Progress Dashboard tracking your improvement
+* 12 languages supported
+* Completely personalised experience
 
 Not just a chatbot. Not just a voice assistant.
 A complete communication training platform —
